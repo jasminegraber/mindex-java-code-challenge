@@ -33,13 +33,16 @@ public class CompensationServiceImpl implements CompensationService {
     }
 
     @Override
-    public Compensation read(String employeeId) {
-        LOG.debug("Reading compensation for employee Id: [{}]", employeeId);
+    public Compensation read(String id) {
+        LOG.debug("Reading compensation for employee id: [{}]", id);
 
-        Employee employee = employeeService.read(employeeId);
+        Employee employee = employeeService.read(id);
         Compensation compensation = compensationRepository.findByEmployee(employee);
 
-        // what if no record found?
+        // what if no employee has no compensation record found?
+        if (compensation == null) {
+            throw new IllegalStateException("No compensation record found for employee id: " + id);
+        }
 
         return compensation;
     }
