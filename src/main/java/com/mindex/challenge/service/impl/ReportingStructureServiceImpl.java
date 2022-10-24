@@ -17,6 +17,7 @@ public class ReportingStructureServiceImpl implements ReportingStructureService 
     @Autowired
     private EmployeeRepository employeeRepository;
 
+
     @Override
     public ReportingStructure read(String id) {
         LOG.debug("Reading reporting structure with id: [{}]", id);

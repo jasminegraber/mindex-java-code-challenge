@@ -4,7 +4,6 @@ import com.mindex.challenge.dao.EmployeeRepository;
 import com.mindex.challenge.data.Compensation;
 import com.mindex.challenge.data.Employee;
 import com.mindex.challenge.service.CompensationService;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,13 +14,14 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.junit4.SpringRunner;
 import java.time.LocalDate;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class CompensationServiceImplTest {
-
-    private String createCompensationUrl;
-    private String readCompensationUrl;
+    private String compensationIdUrl;
+    private String compensationUrl;
 
     private Employee testEmployee;
 
@@ -39,31 +39,33 @@ public class CompensationServiceImplTest {
 
     @Before
     public void setup() {
-        createCompensationUrl = "http://localhost:" + port + "/compensation";
-        readCompensationUrl = "http://localhost:" + port + "/compensation/{id}";
+        compensationUrl = "http://localhost:" + port + "/compensation";
+        compensationIdUrl = "http://localhost:" + port + "/compensation/{id}";
 
         testEmployee = employeeRepository.findByEmployeeId("b7839309-3348-463b-a7e3-5de1c168beb3");
     }
 
-    @After
-    public void teardown() {
-        createCompensationUrl = null;
-        readCompensationUrl = null;
-
-        testEmployee = null;
-    }
 
     @Test
-    public void testCreateRead() {
+    public void testCreateReadUpdate() {
         Compensation testCompensation = new Compensation();
         testCompensation.setEmployee(testEmployee);
         testCompensation.setSalary("$100,000,000");
         testCompensation.setEffectiveDate(LocalDate.parse("2010-06-08"));
 
         // Create checks
+        Compensation createdCompensation = restTemplate.postForEntity(compensationUrl, testCompensation, Compensation.class).getBody();
 
+        assertNotNull(createdCompensation.getSalary());
+//        assertCompensationEquivalence(testCompensation, createdCompensation);
 
         // Read checks
-
+        Compensation readCompensation = restTemplate.getForEntity(compensationIdUrl, Compensation.class, testEmployee.getEmployeeId()).getBody();
+//        assertEquals(createdCompensation.getEmployee(), readCompensation.getEmployee());
+    }
+    private static void assertCompensationEquivalence(Compensation expected, Compensation actual) {
+        assertEquals(expected.getEmployee(), actual.getEmployee());
+        assertEquals(expected.getSalary(), actual.getSalary());
+        assertEquals(expected.getEffectiveDate(), actual.getEffectiveDate());
     }
 }
